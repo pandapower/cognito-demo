@@ -1,0 +1,11 @@
+{
+  "name": "cognito-demo",
+  "version": "1.0.0",
+  "description": "AWS Cognito Demo",
+  "dependencies": {
+    "http-server": "^0.11.1"
+  },
+  "scripts": {
+    "start": "http-server -o -p 3000"
+  }
+}
