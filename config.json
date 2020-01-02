@@ -1,0 +1,8 @@
+{
+  "serviceURL":"{API_GATEWAY_GET_SERVICE_URL}",
+  "authenticationURL": "https://{DOMAIN_PREFIX}.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id={APP_CLIENT_ID}&redirect_uri={COGNITO_CALLBACK_URL}",
+  "tokenURL": "https://{DOMAIN_PREFIX}.auth.us-east-1.amazoncognito.com/oauth2/token",
+  "redirectUri": "{COGNITO_CALLBACK_URL}",
+  "clientId": "{APP_CLIENT_ID}",
+  "clientSecret": "{CLIENT_BASE64_ENCODE}"
+}

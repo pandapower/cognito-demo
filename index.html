@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AWS Cognito Demo</title>
+
+  <script>
+      let config;
+
+      function initPage() {
+        fetch('./config.json')
+          .then(res => res.json())
+          .then((configJson) => {
+            config = configJson;
+            setAuthenticationLink(config.authenticationURL);
+            setAuthorizationCode();
+          }).catch(err => console.error(err))
+      }
+
+      function setAuthenticationLink(authenticationURL) {
+        let authLink = document.getElementById('authentication-link');
+        authLink.href = authenticationURL;
+      }
+
+      function setAuthorizationCode(){
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenParams = {
+          grant_type: 'authorization_code',
+          client_id: config.clientId,
+          redirect_uri: encodeURI(config.redirectUri),
+          code: urlParams.get('code'),
+        };
+
+        // Create form params for body
+        let formBody = [];
+        for (const property in tokenParams) {
+          const encodedKey = encodeURIComponent(property);
+          const encodedValue = encodeURIComponent(tokenParams[property]);
+          formBody.push(encodedKey + "=" + encodedValue);
+        }
+        formBody = formBody.join("&");
+
+        // Get Authorization Token
+        fetch(config.tokenURL,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${config.clientSecret}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formBody,
+          })
+          .then(res => res.json())
+          .then((resultJson) => {
+            console.log('Auth Token Response ==> ', resultJson);
+            document.getElementById('id_token').innerText = resultJson.id_token;
+          })
+          .catch(err => {
+            console.error('Error Calling Auth Service')
+            console.error(err);
+          })
+      }
+
+      function getIDToken() {
+        return document.getElementById('id_token').textContent;
+      }
+
+      function callAPI(){
+        const serviceURL = config.serviceURL;
+        const idToken = getIDToken();
+        console.log(`Calling service ${serviceURL} with id token: ${idToken}`)
+
+        fetch(serviceURL,
+          {
+            credentials: 'include',
+            headers: {
+              'Authorization': idToken,
+            }
+          })
+          .then(res => res.json())
+          .then((resultJson) => {
+            document.getElementById('call-result').innerText = JSON.stringify(resultJson);
+          })
+          .catch(err => {
+            console.error(`Error Calling Service: ${err}`);
+            document.getElementById('call-result').innerText = `ERROR: ${err}`;
+          })
+        }
+
+  </script>
+</head>
+
+<body onload="initPage()">
+
+  <h1>AWS Cognito Demo</h1>
+
+  <h2>Login</h2>
+  <a href="" id="authentication-link">Authenticate</a>
+
+  <h2>ID Token</h2>
+  <div id="id_token"></div>
+
+  <h2>Test API</h2>
+  <button onclick="callAPI()">Call API</button>
+  <h3>API Response</h3>
+  <div id="call-result"></div>
+
+</body>
+
+</html>
